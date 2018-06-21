@@ -15,8 +15,7 @@ th, td {
 
 {% block content %}
     <h1>Room {{ room.name }} details are following:</h1>
-    <form method="POST">
-        {% csrf_token %}
+
         <table style="width:50%">
         <tr>
             <td>Room name</td>
@@ -29,6 +28,38 @@ th, td {
             <td> {{ room.proj_avail }} </td>
         </tr>
         </table>
+
+    <h1>Room {{ room.name }} current reservations are following:</h1>
+    <table>
+        {% for reservation in reservations %}
+        <tr>
+            <td>{{ reservation.data }}</td> <td> {{ reservation.comment }} </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h1>Make reservation</h1>
+    <form method="POST" action="{%url 'make_reservation' room.id %}">
+          {% csrf_token %}
+        <table style="width:50%">
+            <tr>
+                <th colspan=2> Today is {{ current_date }} </th>
+            </tr>
+        <tr>
+            <td>Reseration date</td>
+            <td> <input type="date" name="reservation_date" placeholder="Date" value={{ current_date }} min={{ current_date }}/> </td>
+        </tr>
+        <tr>
+            <td>Reseration comment</td>
+            <td> <input type="text" name="reservation_comment" placeholder="Reservation_comment"/> </td>
+        </tr>
+        <tr>
+            <td colspan=2> <input type="submit" value="Add Reservation"/> </td>
+        </tr>
+        </table>
     </form>
 {% endblock %}
+
+<br/>
+<a href="{% url 'show_all_rooms' %}"> Show All Rooms </a>
 </html>

@@ -3,6 +3,8 @@ from django.http import HttpResponse, request
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from .models import Reservation, Room
+import arrow
+import datetime
 
 class View_room(View):
     def get(self, request):
@@ -50,22 +52,36 @@ def deleteRoom(request, room_id):
     room_to_delete = Room.objects.get(id=room_id)
     name = room_to_delete.name
     room_to_delete.delete()
-    # info = 'Usunięto salę '+name
-    # return HttpResponse(info)
     return redirect('show_all_rooms')
 
 def showRoomDetails(request, room_id):
     room = Room.objects.get(id=room_id)
+    #reservations = Reservation.objects.get(room_id=room_id) <- this way I will get an object
+    reservations = Reservation.objects.all().filter(room_id=room_id) #<- this way I will get QuerySet
     return render(request, 'ShowRoomDetails.html', {
-        'room': room
+        'room': room,
+        'current_date': datetime.date.today(),
+        'reservations':reservations
     })
 
 def showAllRooms(request):
     allRooms = Room.objects.all()
-    #print (type(allRooms))
-    #allRooms = "All Rooms Here"
     return render(request, 'ShowAllRooms.html', {
-        'allRooms': allRooms
+        'allRooms': allRooms, 'current_date': datetime.date.today()
     })
+
+def make_reservation(request, room_id):
+    if request.method == 'POST':
+        reservation_date = request.POST.get('reservation_date')
+        print(reservation_date)
+        print(type(reservation_date))
+        reservation_comment = request.POST.get('reservation_comment')
+        print(reservation_comment)
+        reservation=Reservation()
+        reservation.comment=reservation_comment
+        reservation.data=reservation_date
+        reservation.room_id=Room.objects.get(id=room_id)
+        reservation.save()
+        return redirect('show_all_rooms')
 
 # Create your views here.
