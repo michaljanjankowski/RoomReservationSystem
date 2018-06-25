@@ -71,17 +71,33 @@ def showAllRooms(request):
     })
 
 def make_reservation(request, room_id):
+    reservations = Reservation.objects.all().filter(room_id=room_id)
+    reservations_list = []
+    for reservation in reservations:
+        reservations_list.append(reservation.data)
+    #print(reservations_list)
     if request.method == 'POST':
         reservation_date = request.POST.get('reservation_date')
-        print(reservation_date)
-        print(type(reservation_date))
-        reservation_comment = request.POST.get('reservation_comment')
-        print(reservation_comment)
-        reservation=Reservation()
-        reservation.comment=reservation_comment
-        reservation.data=reservation_date
-        reservation.room_id=Room.objects.get(id=room_id)
-        reservation.save()
-        return redirect('show_all_rooms')
+        reservation_date = datetime.datetime.strptime(reservation_date, '%Y-%m-%d') #it makes conversion to datetime.datetime
+        reservation_date = reservation_date.date() #here it makes conversion to datetime.date
+        #print(reservation_date)
+        #print(type(reservation_date))
+        for oldreservation in reservations_list:
+            if oldreservation == reservation_date:
+                didnt_add = "Room is already reserved for this day"
+                return HttpResponse(didnt_add)
+
+
+        if reservation_date >= datetime.date.today():
+            reservation_comment = request.POST.get('reservation_comment')
+            reservation=Reservation()
+            reservation.comment=reservation_comment
+            reservation.data=reservation_date
+            reservation.room_id=Room.objects.get(id=room_id)
+            reservation.save()
+            return redirect('show_all_rooms')
+        else:
+            didnt_add ="You can to reserve room from the past"
+            return HttpResponse(didnt_add)
 
 # Create your views here.
