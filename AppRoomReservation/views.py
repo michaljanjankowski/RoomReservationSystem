@@ -56,7 +56,7 @@ def deleteRoom(request, room_id):
 
 def showRoomDetails(request, room_id):
     room = Room.objects.get(id=room_id)
-    #reservations = Reservation.objects.get(room_id=room_id) <- this way I will get an object
+    #reservations = Reservation.objects.get(room_id=room_id) <- this way I will get an object, get gets only one object
     reservations = Reservation.objects.all().filter(room_id=room_id) #<- this way I will get QuerySet
     return render(request, 'ShowRoomDetails.html', {
         'room': room,
@@ -66,8 +66,14 @@ def showRoomDetails(request, room_id):
 
 def showAllRooms(request):
     allRooms = Room.objects.all()
+    allTodayReservations = Reservation.objects.filter(data=datetime.date.today())
+    busy_room_list =[]
+    for elem in allTodayReservations:
+        busy_room_list.append(elem.room_id.name)
     return render(request, 'ShowAllRooms.html', {
-        'allRooms': allRooms, 'current_date': datetime.date.today()
+        'allRooms': allRooms,
+        'current_date': datetime.date.today(),
+        'today_reservations': busy_room_list
     })
 
 def make_reservation(request, room_id):
