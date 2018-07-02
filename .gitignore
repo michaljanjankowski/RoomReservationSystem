@@ -103,3 +103,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+#do not commit your localsettings
+localsettings.py
