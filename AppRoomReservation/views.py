@@ -57,7 +57,8 @@ def deleteRoom(request, room_id):
 def showRoomDetails(request, room_id):
     room = Room.objects.get(id=room_id)
     #reservations = Reservation.objects.get(room_id=room_id) <- this way I will get an object, get gets only one object
-    reservations = Reservation.objects.all().filter(room_id=room_id) #<- this way I will get QuerySet
+
+    reservations = Reservation.objects.all().filter(room_id=room_id).filter(data__gte=datetime.date.today()) #<- this way I will get QuerySet
     return render(request, 'ShowRoomDetails.html', {
         'room': room,
         'current_date': datetime.date.today(),
@@ -101,9 +102,36 @@ def make_reservation(request, room_id):
             reservation.data=reservation_date
             reservation.room_id=Room.objects.get(id=room_id)
             reservation.save()
-            return redirect('show_all_rooms')
+            return redirect('show_room_details',room_id=room_id)
         else:
-            didnt_add ="You can to reserve room from the past"
+            didnt_add ="You can not reserve room from the past"
             return HttpResponse(didnt_add)
 
+def search(request):
+    if request.method == 'GET':
+        reservation_date = request.GET.get('reservation_date')
+        if reservation_date is not '':
+            reservation_date = datetime.datetime.strptime(reservation_date, '%Y-%m-%d') #it makes conversion to datetime.datetime
+            reservation_date = reservation_date.date() #here it makes conversion to datetime.date
+        else:
+            reservation_date = None
+
+        room_capacity = (request.GET.get('capacity'))
+        if room_capacity is not '':
+            room_capacity = int(room_capacity)
+        else:
+            room_capacity = None
+
+        room_name = request.GET.get('name')
+        room_projector = bool(request.GET.get('projector'))
+
+        print(room_name)
+        print(type(room_name))
+        print(room_capacity)
+        print(type(room_capacity))
+        print(room_projector)
+        print(type(room_projector))
+
+    result="There are no rooms available for the given search criteria"
+    return HttpResponse(result)
 # Create your views here.
