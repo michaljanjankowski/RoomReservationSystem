@@ -9,7 +9,7 @@ class Room(models.Model):
     proj_avail = models.BooleanField()
 
 class Reservation(models.Model):
-    data = models.DateField()
+    data = models.DateField(verbose_name="data")
     comment = models.CharField(max_length=500)
     room_id = models.ForeignKey(Room, related_name="reservation", null=True, on_delete=models.CASCADE)
     #tutaj uwaga bo w Jeden do Wiele musi być dopisana funkcja on_delete

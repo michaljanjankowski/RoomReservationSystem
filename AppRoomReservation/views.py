@@ -123,15 +123,31 @@ def search(request):
             room_capacity = None
 
         room_name = request.GET.get('name')
+        if room_name is '':
+            room_name = None
+
         room_projector = bool(request.GET.get('projector'))
 
-        print(room_name)
-        print(type(room_name))
-        print(room_capacity)
-        print(type(room_capacity))
-        print(room_projector)
-        print(type(room_projector))
+        rooms = Room.objects.all()
 
-    result="There are no rooms available for the given search criteria"
-    return HttpResponse(result)
+        if room_name is not None:
+            rooms = rooms.filter(name__contains=room_name)
+
+        if room_capacity is not None:
+            rooms = rooms.filter(capacity__gte=room_capacity)
+
+        if room_projector:
+            rooms = rooms.filter(proj_avail=room_projector)
+
+        if reservation_date is not None:
+            rooms = rooms.exclude(reservation__data=reservation_date)
+
+        if len(rooms) == 0:
+            result = "There are no rooms available for the given search criteria"
+            return HttpResponse(result)
+        else:
+            return render(request, 'RoomsFound.html', {
+                'FoundRooms': rooms,
+            })
+
 # Create your views here.
